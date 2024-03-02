@@ -138,14 +138,17 @@ int q_size(struct list_head *head)
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
-
-    int l_len=q_size(head);
-    if (!l_len){
+    if(!head||list_empty(head))
         return false;
+    struct list_head *hare=head->next->next;
+    struct list_head *tortoise=head->next;
+    while(hare!=head||hare!=head->prev){
+        hare=hare->next->next;
+        tortoise=tortoise->next;
     }
-
-    
-    
+    element_t *Tor=list_entry(tortoise,element_t,list);
+    list_del(tortoise);
+    q_release_element(Tor);
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
     return true;
 }
@@ -153,7 +156,22 @@ bool q_delete_mid(struct list_head *head)
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
-
+    if (!head)
+        return false;
+    element_t *entry=(element_t*)malloc(sizeof(element_t));
+    element_t *entry_prev=(element_t*)malloc(sizeof(element_t);
+    if(entry||entry_prev){
+        free(entry);
+        free(entry_prev);
+        return false;
+    }
+    list_for_each_entry(entry,head,list){
+        entry_prev=list_entry(entry->list.prev, element_t, list);
+        if (entry_prev->value==entry->value){
+            list_del(&entry_prev->list);
+            q_release_element(entry_prev);
+        }
+    }
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
     return true;
 }
