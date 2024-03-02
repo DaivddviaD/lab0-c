@@ -95,7 +95,8 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     rem_h=list_entry(head->next, element_t,list);
     list_del(&rem_h->list);
     if (sp && bufsize){
-        strncpy(sp,rem_h->value,bufsize);
+        strncpy(sp,rem_h->value,bufsize-1);
+        sp[bufsize-1]='\0';
     }
     return rem_h;
 
@@ -115,7 +116,8 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     rem_l=list_entry(head->next, element_t,list);
     list_del(&rem_l->list);
     if (sp && bufsize){
-        strncpy(sp,rem_l->value,bufsize);
+        strncpy(sp,rem_l->value,bufsize-1);
+        sp[bufsize-1]='\0';
     }
     return rem_l;
 }
@@ -131,12 +133,19 @@ int q_size(struct list_head *head)
     }
     }
     return size;
-    return -1;
 }
 
 /* Delete the middle node in queue */
 bool q_delete_mid(struct list_head *head)
 {
+
+    int l_len=q_size(head);
+    if (!l_len){
+        return false;
+    }
+
+    
+    
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
     return true;
 }
@@ -144,6 +153,7 @@ bool q_delete_mid(struct list_head *head)
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
+
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
     return true;
 }
@@ -155,7 +165,16 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head) {
+    if (head||!list_empty(head)||q_size(head)){
+        struct list_head *temp_node=head->next;
+        while(temp_node!=head){
+            temp_node=temp_node->next;
+            list_move(temp_node->prev,head);
+        }
+    }
+    return;
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
