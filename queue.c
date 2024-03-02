@@ -24,20 +24,19 @@ struct list_head *q_new()
 
 /* Free all storage used by queue */
 void q_free(struct list_head *head) {
-    if(!head){
+    if (!head){
         return;
     }
     element_t *entry, *safe;
-    list_for_each_entry_safe (entry,safe,head, list);
+    list_for_each_entry_safe(entry,safe,head,list)
     q_release_element(entry);
     free(head);
-
 }
 
-/* Insert an element at head of queue */
+
 bool q_insert_head(struct list_head *head, char *s)
 {
-    element_t *new_e=(element_t*) malloc(sizeof(element_t));
+   element_t *new_e=(element_t*) malloc(sizeof(element_t));
     if (!new_e){
     free(new_e);
         return false;
@@ -55,6 +54,9 @@ bool q_insert_head(struct list_head *head, char *s)
         return true;
         }
         }
+
+
+    
 }
 
 /* Insert an element at tail of queue */
@@ -78,24 +80,57 @@ bool q_insert_tail(struct list_head *head, char *s)
     return true;
     }
     }
-
 }
 
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if(!head||list_empty(head))
+        return NULL;
+    element_t *rem_h=(element_t*)malloc(sizeof(element_t));
+    if (!rem_h){
+        free(rem_h);
+        return NULL;
+    }
+    rem_h=list_entry(head->next, element_t,list);
+    list_del(&rem_h->list);
+    if (sp && bufsize){
+        strncpy(sp,rem_h->value,bufsize);
+    }
+    return rem_h;
+
+
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if(!head||list_empty(head))
+        return NULL;
+    element_t *rem_l=(element_t*)malloc(sizeof(element_t));
+    if (!rem_l){
+        free(rem_l);
+        return NULL;
+    }
+    rem_l=list_entry(head->next, element_t,list);
+    list_del(&rem_l->list);
+    if (sp && bufsize){
+        strncpy(sp,rem_l->value,bufsize);
+    }
+    return rem_l;
 }
 
 /* Return number of elements in queue */
 int q_size(struct list_head *head)
 {
+    int size=0;
+    if (head||!list_empty(head)){
+        struct list_head *node;
+        list_for_each(node, head){
+        size++;
+    }
+    }
+    return size;
     return -1;
 }
 
