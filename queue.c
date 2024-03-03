@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <types.h>
+#include <stdint.h>
+
 
 #include "queue.h"
 
@@ -138,7 +139,7 @@ int q_size(struct list_head *head)
 
 
 //this input is without head
-struct list_head* find_mid_nodes(sturct list_head *first){
+struct list_head* find_mid_nodes(struct list_head *first){
     struct list_head *hare=first,*tortoise=first;
     while(hare && hare->next){
         tortoise=tortoise->next;
@@ -168,7 +169,7 @@ bool q_delete_dup(struct list_head *head)
     if (!head)
         return false;
     element_t *entry=(element_t*)malloc(sizeof(element_t));
-    element_t *entry_prev=(element_t*)malloc(sizeof(element_t);
+    element_t *entry_prev=(element_t*)malloc(sizeof(element_t));
     if(entry||entry_prev){
         free(entry);
         free(entry_prev);
@@ -188,7 +189,7 @@ bool q_delete_dup(struct list_head *head)
 /* Swap every two adjacent nodes */
 void q_swap(struct list_head *head)
 {   
-    q_reversek(head,2);
+    q_reverseK(head,2);
     // https://leetcode.com/problems/swap-nodes-in-pairs/
 }
 
@@ -236,7 +237,7 @@ struct list_head *mergeTwoList(struct list_head *left,struct list_head *right,bo
         *merge_ad= *ptr;
         merge_ad = &(*merge_ad)->next;
     }
-    *merge_ad = (struct list_head *) ((u_int64_t) left | (u_int64_t) right);
+    *merge_ad = (struct list_head *) ((uint64_t*) left | (uint64_t*) right);
     return merge_h;
 }
 
@@ -244,7 +245,7 @@ struct list_head *mergeTwoList(struct list_head *left,struct list_head *right,bo
 struct list_head* Divide(struct list_head *first,bool descend){
 if (!first || !first->next)
         return first;
-    struct list_head *mid=find_mid_nodes(first)
+    struct list_head *mid=find_mid_nodes(first);
     
     mid->prev->next = NULL;
 
@@ -318,19 +319,19 @@ int q_merge(struct list_head *head, bool descend)
     first_chain=list_entry(head->next,queue_contex_t,chain)->q;
     first_chain->prev->next=NULL;
     final_size=q_size(first_chain);
-    be_merge=head->next->next;
+    be_merged=head->next->next;
 
-    while(be_merge!=head){
-        struct list_head *be_merged_q=list_entry(be_merge,queue_contex_t,chain)->q;
+    while(be_merged!=head){
+        struct list_head *be_merged_q=list_entry(be_merged,queue_contex_t,chain)->q;
         final_size+=q_size(be_merged_q);
 
         be_merged_q->prev->next=NULL;
-        first_chain->next=mergeTwoList(first_chain->next,be_merge_q->next,descend);
+        first_chain->next=mergeTwoList(first_chain->next,be_merged_q->next,descend);
         element_t *entry, *safe;
         list_for_each_entry_safe(entry,safe,be_merged_q,list)
         q_release_element(entry);
         INIT_LIST_HEAD(be_merged_q);
-        be_merge=be_merge->next;
+        be_merged=be_merged->next;
     }
 
     first_chain->prev->next=first_chain;
