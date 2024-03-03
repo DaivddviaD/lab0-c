@@ -136,12 +136,13 @@ int q_size(struct list_head *head)
     return size;
 }
 
-struct list_head* find_mid_node(struct list_head *head){
-    struct list_head *hare=head->next->next;
-    struct list_head *tortoise=head->next;
-    while(hare!=head||hare!=head->prev){
-        hare=hare->next->next;
+
+//this input is without head
+struct list_head* find_mid_nodes(sturct list_head *first){
+    struct list_head *hare=first,*tortoise=first;
+    while(hare && hare->next){
         tortoise=tortoise->next;
+        hare=hare->next->next;
     }
     return tortoise;
 }
@@ -151,10 +152,12 @@ bool q_delete_mid(struct list_head *head)
 {
     if(!head||list_empty(head))
         return false;
-    struct list_head *tortoise=find_mid_node(head);
+    head->prev->next=NULL;
+    struct list_head *tortoise=find_mid_nodes(head->next);
     element_t *Tor=list_entry(tortoise,element_t,list);
     list_del(tortoise);
     q_release_element(Tor);
+    head->prev->next=head;
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
     return true;
 }
@@ -225,29 +228,29 @@ void q_reverseK(struct list_head *head, int k)
 
 struct list_head *mergeTwoList(struct list_head *left,struct list_head *right,bool descend)
 {
-    struct list_head *merge_h = NULL, **indirect = &m_head, **iter = NULL;
-    for (; left && right; *iter = (*iter)->next) {
-        iter = strcmp(list_entry(left, element_t, list)->value,list_entry(right, element_t, list)->value) >= 0? &right: &left;
-        *indirect = *iter;
-        indirect = &(*indirect)->next;
+    struct list_head *merge_h = NULL, **merge_ad = &merge_h;
+
+    for (struct list_head ** ptr=NULL; left && right; *ptr = (*ptr)->next) {
+        ptr = (strcmp(list_entry(left, element_t, list)->value,
+                       list_entry(right, element_t, list)->value) >= 0)!= descend ? &right: &left;
+        *merge_ad= *ptr;
+        merge_ad = &(*merge_ad)->next;
     }
-    *indirect = (struct list_head *) ((u_int64_t) left | (u_int64_t) right);
-    return m_head;
+    *merge_ad = (struct list_head *) ((u_int64_t) left | (u_int64_t) right);
+    return merge_h;
 }
 
-struct list_head* merge_sort(struct list_head *head){
-if (!head || !head->next)
-        return head;
-    struct list_head *fast = head, *slow = head, *mid;
 
-    for (; fast && fast->next; fast = fast->next->next)
-        slow = slow->next;
-    mid = slow;
+struct list_head* Divide(struct list_head *first,bool descend){
+if (!first || !first->next)
+        return first;
+    struct list_head *mid=find_mid_nodes(first)
+    
     mid->prev->next = NULL;
-    struct list_head *left = merge_divide(head);
-    struct list_head *right = merge_divide(mid);
-    return merge_two_nodes(left, right);
+
+    return mergeTwoList(Divide(first,descend), Divide(mid,descend),descend);
 }
+
 
 
 /* Sort elements of queue in ascending/descending order */
@@ -255,17 +258,8 @@ void q_sort(struct list_head *head, bool descend) {
     if (!head || list_empty(head) || list_is_singular(head))
         return;
     head->prev->next = NULL;
-    head->next = merge_divide(head->next);
-    struct list_head *fir = head, *sec = head->next;
-    for (; sec != NULL; sec = sec->next) {
-        sec->prev = fir;
-        fir = sec;
-    }
-    fir->next = head;
-    head->prev = fir;
-    if (descend)
-        q_reverse(head);
-
+    head->next = Divide(head->next,descend);
+    head->prev->next=head;
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
