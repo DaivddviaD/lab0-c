@@ -170,7 +170,7 @@ bool q_delete_dup(struct list_head *head)
         return false;
     element_t *entry=(element_t*)malloc(sizeof(element_t));
     element_t *entry_prev=(element_t*)malloc(sizeof(element_t));
-    if(entry||entry_prev){
+    if(!entry||!entry_prev){
         free(entry);
         free(entry_prev);
         return false;
@@ -195,14 +195,16 @@ void q_swap(struct list_head *head)
 
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head) {
-    if (head||!list_empty(head)||q_size(head)){
-        struct list_head *temp_node=head->next;
-        while(temp_node!=head){
-            temp_node=temp_node->next;
-            list_move(temp_node->prev,head);
-        }
+    if (!head||list_empty(head)){
+        return;
     }
-    return;
+        struct list_head *node, *safe;
+        list_for_each_safe(node,safe,head){
+            node->next=node->prev;
+            node->prev=safe;
+        }
+            node->next=node->prev;
+            node->prev=safe;
 }
 
 /* Reverse the nodes of the list k at a time */
@@ -237,7 +239,7 @@ struct list_head *mergeTwoList(struct list_head *left,struct list_head *right,bo
         *merge_ad= *ptr;
         merge_ad = &(*merge_ad)->next;
     }
-    *merge_ad = (struct list_head *) ((uint64_t*) left | (uint64_t*) right);
+    *merge_ad = (struct list_head *) ((uintptr_t) left | (uintptr_t) right);
     return merge_h;
 }
 
