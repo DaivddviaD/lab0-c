@@ -4,7 +4,6 @@
 
 
 
-
 #include "queue.h"
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
@@ -45,6 +44,7 @@ void q_free(struct list_head *head)
     free(head);
 
 }
+
 
 
 bool q_insert_head(struct list_head *head, char *s)
@@ -104,8 +104,6 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
         sp[bufsize-1]='\0';
     }
     return rem_h;
-
-
 }
 
 /* Remove an element from tail of queue */
@@ -231,7 +229,7 @@ void q_reverseK(struct list_head *head, int k)
 }
 //used to divide list to sort
 
-struct list_head *mergeTwoList(struct list_head *left,struct list_head *right)
+struct list_head *mergeTwoList(struct list_head *left,struct list_head *right,bool descend)
 {
     struct list_head *merge_h = NULL, **merge_ad = &merge_h;
     struct list_head ** ptr=NULL;
@@ -239,28 +237,23 @@ struct list_head *mergeTwoList(struct list_head *left,struct list_head *right)
 
 
     for (; left && right; *ptr = (*ptr)->next) {
-        ptr = (strcmp(list_entry(left, element_t, list)->value,list_entry(right, element_t, list)->value) >= 0) ? &right: &left;
+        ptr = (strcmp(list_entry(left, element_t, list)->value,list_entry(right, element_t, list)->value) >= 0)^descend ? &right: &left;
         *merge_ad= *ptr;
         merge_ad = &(*merge_ad)->next;
-    }
-    if (left){
-        *merge_ad=right;
-    }else{
-        *merge_ad=left;
     }
     *merge_ad = (struct list_head *) ((u_int64_t) left | (u_int64_t) right);
     return merge_h;
 }
 
 
-struct list_head* Divide(struct list_head *first){
+struct list_head* Divide(struct list_head *first,bool descend){
 if (!first || !first->next)
         return first;
     struct list_head *mid=find_mid_nodes(first);
 
     mid->prev->next = NULL;
 
-    return mergeTwoList(Divide(first), Divide(mid));
+    return mergeTwoList(Divide(first,descend), Divide(mid,descend),descend);
 }
 
 
@@ -270,7 +263,7 @@ void q_sort(struct list_head *head, bool descend) {
     if (!head || list_empty(head) || list_is_singular(head))
         return;
     head->prev->next = NULL;
-    head->next = Divide(head->next);
+    head->next = Divide(head->next,descend);
     struct list_head *node=head,*safe=head->next;
     while(safe){
         safe->prev=node;
@@ -279,9 +272,6 @@ void q_sort(struct list_head *head, bool descend) {
     }
     head->prev=node;
     node->next=head;
-    if (descend){
-        q_reverse(head);
-    }
 }
 
 
@@ -347,7 +337,7 @@ int q_merge(struct list_head *head, bool descend)
         final_size+=q_size(be_merged_q);
 
         be_merged_q->prev->next=NULL;
-        first_chain->next=mergeTwoList(first_chain->next,be_merged_q->next);
+        first_chain->next=mergeTwoList(first_chain->next,be_merged_q->next,descend);
 
         INIT_LIST_HEAD(be_merged_q);
         be_merged=be_merged->next;
